@@ -1,4 +1,5 @@
 package dev.langchain4j.adaptiverag;
+
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.output.structured.Description;
@@ -6,17 +7,23 @@ import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
 import java.time.Duration;
 import java.util.function.Function;
+
 /**
+ * 问题路由器
+ * 将用户查询路由到最相关的数据源。
  * Router for user queries to the most relevant datasource.
  */
 public record QuestionRouter( String openApiKey ) implements Function<String, QuestionRouter.Type> {
 
-
+    /**
+     * 问题类型
+     */
     public enum Type {
         vectorstore,
         web_search
     }
     /**
+     * 将用户查询路由到最相关的数据源。
     * Route a user query to the most relevant datasource.
     */
     static class Result {
@@ -27,6 +34,7 @@ public record QuestionRouter( String openApiKey ) implements Function<String, Qu
 
 
     /**
+     * 提供用于处理用户问题的服务接口。
      * Provides a service interface for processing user questions.
      * 
      * @SystemMessage "You are an expert at routing a user question to a vectorstore or web search. The vectorstore contains documents related to agents, prompt engineering, and adversarial attacks. Use the vectorstore for questions on these topics. Otherwise, use web-search."
@@ -51,6 +59,7 @@ public record QuestionRouter( String openApiKey ) implements Function<String, Qu
     }
 
     /**
+     * 将给定的问题应用于 AI 模型并从响应中提取数据来源。
      * Applies a given question to an AI model and extracts the data source from the response.
      * @param question The question to be applied to the AI model.
      * @return The extracted data source from the model's response.

@@ -8,6 +8,7 @@ import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
 import java.time.Duration;
 
 /**
+ * Chroma商店
  * The ChromaStore class provides a singleton interface for interacting with the Chroma Embedding Store.
  * This class is designed to be used in conjunction with an OpenAI API key to perform search operations on text segments.
  * It abstracts the embedding model and the storage layer, offering a simple method to retrieve relevant data based on queries.
@@ -50,13 +51,16 @@ public final class ChromaStore {
      */
     public EmbeddingSearchResult<TextSegment> search(String query) {
 
+        // 嵌入
         Embedding queryEmbedding = embeddingModel.embed(query).content();
 
+        // 嵌入搜索
         EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest.builder()
                 .queryEmbedding( queryEmbedding )
                 .maxResults( 1 )
                 .minScore( 0.0 )
                 .build();
+        // 相似性搜索
         return chroma.search( searchRequest );
 
     }

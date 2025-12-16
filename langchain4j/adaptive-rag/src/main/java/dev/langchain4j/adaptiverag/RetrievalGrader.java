@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.util.function.Function;
 
 /**
+ * 检索评分器
  * The RetrievalGrader class implements a function to assess the relevance of a retrieved document
  * to a user's question. It uses an AI service to generate a binary score ('yes' or 'no') indicating relevance.
  * This class relies on external services for processing and grading documents, making it dependent

@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * This class implements a {@link Function} to rewrite questions for better vectorstore retrieval.
+ * 问题重写器
+ * This class implements a {@link Function} to rewrite questions for better vectorStore retrieval.
  * It uses an AI language model to rephrase input questions based on semantic intent and meaning.
  *
  */
@@ -31,7 +32,7 @@ public record QuestionRewriter( String openApiKey ) implements Function<String, 
          */
         @SystemMessage(
                 "You a question re-writer that converts an input question to a better version that is optimized \n" +
-                "for vectorstore retrieval. Look at the input and try to reason about the underlying semantic intent / meaning.")
+                "for vectorStore retrieval. Look at the input and try to reason about the underlying semantic intent / meaning.")
         String invoke(String question);
     }
 
@@ -64,8 +65,10 @@ public record QuestionRewriter( String openApiKey ) implements Function<String, 
 
         LLMService service = AiServices.create(LLMService.class, chatLanguageModel);
 
+        // 提示模版
         PromptTemplate template = PromptTemplate.from("Here is the initial question: \n\n {{question}} \n Formulate an improved question.");
 
+        // 优化问题-提示
         Prompt prompt = template.apply( Map.of( "question", question ) );
 
         return service.invoke( prompt.text() );

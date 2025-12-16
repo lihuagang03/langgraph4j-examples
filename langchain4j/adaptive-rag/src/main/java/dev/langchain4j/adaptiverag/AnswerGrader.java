@@ -11,6 +11,8 @@ import java.time.Duration;
 import java.util.function.Function;
 
 /**
+ * 答案评分器
+ * 用于根据答案是否回答了给定问题而进行评分的类。
  * Class to grade answers based on whether they address a given question.
  * Implements the Function interface to take in Arguments and output a Score.
  */
@@ -34,6 +36,7 @@ public record AnswerGrader(String openApiKey) implements Function<AnswerGrader.A
 
 
     /**
+     * 服务操作
      * Interface for service operations.
      *
      * @author [Your Name]
@@ -59,6 +62,7 @@ public record AnswerGrader(String openApiKey) implements Function<AnswerGrader.A
      */
     @Override
     public Score apply(Arguments args) {
+        // 聊天模型
         ChatModel chatLanguageModel = OpenAiChatModel.builder()
                 .apiKey( openApiKey )
                 .modelName( "gpt-3.5-turbo-0125" )
@@ -71,10 +75,13 @@ public record AnswerGrader(String openApiKey) implements Function<AnswerGrader.A
                 .build();
 
 
+        // 创建服务
         Service service = AiServices.create(Service.class, chatLanguageModel);
 
+        // 结构化的提示词
         Prompt prompt = StructuredPromptProcessor.toPrompt(args);
 
+        // 调用
         return service.invoke(prompt.text());
     }
 

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
+ * 网络搜索工具
 * The `WebSearchTool` class provides a solution for performing web searches based on user queries.
 * It implements the {@literal Function<String, List<Content>> } interface to define how queries are processed and results are returned.
 * The class utilizes an API key from Tavily to authenticate requests to their search engine.
@@ -19,6 +20,7 @@ import java.util.function.Function;
 public record WebSearchTool( String tavilyApiKey ) implements Function<String, List<Content>> {
 
     /**
+     * 将查询应用到搜索引擎，并检索最多 3 个结果。
      * Applies the query to a search engine and retrieves up to 3 results.
      *
      * @param query The search query to be executed.
@@ -26,10 +28,12 @@ public record WebSearchTool( String tavilyApiKey ) implements Function<String, L
      */
     @Override
     public List<Content> apply(String query) {
+        // 网络搜索引擎
         WebSearchEngine webSearchEngine = TavilyWebSearchEngine.builder()
                 .apiKey(tavilyApiKey) // get a free key: https://app.tavily.com/sign-in
                 .build();
 
+        // 网页搜索的内容检索器
         ContentRetriever webSearchContentRetriever = WebSearchContentRetriever.builder()
                 .webSearchEngine(webSearchEngine)
                 .maxResults(3)
