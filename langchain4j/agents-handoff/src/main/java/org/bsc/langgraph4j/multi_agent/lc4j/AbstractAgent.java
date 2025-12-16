@@ -7,12 +7,25 @@ import dev.langchain4j.service.tool.ToolExecutor;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * 代理的抽象基类
+ * 工具执行器
+ */
 public abstract class AbstractAgent<B extends AbstractAgent.Builder<B>> implements ToolExecutor {
 
     public static abstract class Builder<B extends Builder<B>> {
 
+        /**
+         * 代理名称
+         */
         private String name;
+        /**
+         * 代理的描述
+         */
         private String description;
+        /**
+         * JSON对象模式的参数列表
+         */
         private JsonObjectSchema parameters;
 
         @SuppressWarnings("unchecked")
@@ -42,7 +55,9 @@ public abstract class AbstractAgent<B extends AbstractAgent.Builder<B>> implemen
         }
 
         public B singleParameter(String context) {
+            // 单个参数
             if (this.parameters == null) {
+                // 上下文
                 this.parameters = JsonObjectSchema.builder()
                         .addStringProperty("context",
                                 Objects.requireNonNull(context, "context cannot be null"))
@@ -53,8 +68,17 @@ public abstract class AbstractAgent<B extends AbstractAgent.Builder<B>> implemen
 
     }
 
+    /**
+     * 代理名称
+     */
     private final String name;
+    /**
+     * 代理的描述
+     */
     private final String description;
+    /**
+     * JSON对象模式的参数列表
+     */
     private final JsonObjectSchema parameters;
 
     public String name() {
@@ -70,6 +94,7 @@ public abstract class AbstractAgent<B extends AbstractAgent.Builder<B>> implemen
     }
 
     public Map.Entry<ToolSpecification, ToolExecutor> asTool() {
+        // 工具规格
         var spec = ToolSpecification.builder()
                 .name(name())
                 .description(description())
