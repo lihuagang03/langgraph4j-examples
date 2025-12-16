@@ -10,21 +10,46 @@ import org.bsc.langgraph4j.spring.ai.agentexecutor.AgentExecutor;
 import org.springframework.ai.chat.model.ChatModel;
 
 /**
+ * 聊天记忆代理
  * @author lambochen
  */
 public class MemoryAgent {
 
+    /**
+     * 状态图
+     * 代理执行器状态
+     */
     private final StateGraph<AgentExecutor.State> graph;
+    /**
+     * 已编译图的工作流程
+     * 代理执行器状态
+     */
     private final CompiledGraph<AgentExecutor.State> workflow;
 
+    /**
+     * @param llm 聊天模型
+     */
     public MemoryAgent(ChatModel llm) throws GraphStateException {
+        // 聊天模型
+        // 内存的保存器
         this(llm, new MemorySaver());
     }
 
+    /**
+     * @param llm 聊天模型
+     * @param memorySaver 基础检查点的保存器
+     */
     public MemoryAgent(ChatModel llm, BaseCheckpointSaver memorySaver) throws GraphStateException {
-        this.graph = AgentExecutor.builder().chatModel(llm).build();
+        // 构建状态图
+        this.graph = AgentExecutor.builder()
+                .chatModel(llm)
+                .build();
+
+        // 构建工作流程
         this.workflow = graph.compile(
-                CompileConfig.builder().checkpointSaver(memorySaver).build()
+                CompileConfig.builder()
+                        .checkpointSaver(memorySaver)
+                        .build()
         );
     }
 

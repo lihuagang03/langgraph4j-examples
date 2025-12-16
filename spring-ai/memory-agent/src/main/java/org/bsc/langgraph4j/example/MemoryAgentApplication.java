@@ -1,6 +1,5 @@
 package org.bsc.langgraph4j.example;
 
-
 import org.bsc.langgraph4j.RunnableConfig;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
@@ -12,6 +11,9 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.Map;
 
+/**
+ * 聊天记忆代理应用
+ */
 @SpringBootApplication
 public class MemoryAgentApplication {
 
@@ -19,15 +21,26 @@ public class MemoryAgentApplication {
         SpringApplication.run(MemoryAgentApplication.class, args);
     }
 
+    /**
+     * 聊天记忆机器人
+     * @param llm 大模型
+     */
     @Bean
     CommandLineRunner memoryChatbot(ChatModel llm) {
         return args -> {
-            var workflow = new MemoryAgent(llm).workflow();
+            // 聊天记忆代理的工作流程
+            var workflow = new MemoryAgent(llm)
+                    .workflow();
 
+            // 会话ID
             var conversationId = "conversation-1";
 
+            // 对话-1
             // conversation-1: step 1
-            var runnableConfig =  RunnableConfig.builder().threadId(conversationId).build();
+            var runnableConfig =  RunnableConfig.builder()
+                    .threadId(conversationId)
+                    .build();
+            // 调用
             var state = workflow.invoke(
                     Map.of("messages", new UserMessage("Hi，I'm LangGraph4j!")),
                     runnableConfig
@@ -47,9 +60,12 @@ public class MemoryAgentApplication {
                     state.lastMessage().map(Content::getText).orElse("UNKNOWN")
             ); // It can be seen here that the historical messages have been stored
 
+            // 其他对话
             // other conversation
             conversationId = "conversation-2";
-            runnableConfig =  RunnableConfig.builder().threadId(conversationId).build();
+            runnableConfig =  RunnableConfig.builder()
+                    .threadId(conversationId)
+                    .build();
             state = workflow.invoke(
                     Map.of("messages", new UserMessage("Do you know my name?")),
                     runnableConfig
@@ -61,7 +77,7 @@ public class MemoryAgentApplication {
         };
     }
 
-    /**
+    /*
      * conversation-1:
      * {messages=[UserMessage{content='Hi，I'm LangGraph4j!', properties={messageType=USER}, messageType=USER}, AssistantMessage [messageType=ASSISTANT, toolCalls=[], textContent=Hello, LangGraph4j! How can I assist you today?, metadata={role=ASSISTANT, messageType=ASSISTANT, refusal=, finishReason=STOP, annotations=[], index=0, id=chatcmpl-BadnH9kFrk8LWxG17bgfqjXHzf7MX}]]}
      * {messages=[UserMessage{content='Hi，I'm LangGraph4j!', properties={messageType=USER}, messageType=USER}, AssistantMessage [messageType=ASSISTANT, toolCalls=[], textContent=Hello, LangGraph4j! How can I assist you today?, metadata={role=ASSISTANT, messageType=ASSISTANT, refusal=, finishReason=STOP, annotations=[], index=0, id=chatcmpl-BadnH9kFrk8LWxG17bgfqjXHzf7MX}], UserMessage{content='Who am I？', properties={messageType=USER}, messageType=USER}, AssistantMessage [messageType=ASSISTANT, toolCalls=[], textContent=You referred to yourself as LangGraph4j, which suggests you might be related to a graph-based framework or library, possibly for programming or data analysis. However, without more context, it’s hard to say exactly who you are. Can you provide more details?, metadata={role=ASSISTANT, messageType=ASSISTANT, refusal=, finishReason=STOP, annotations=[], index=0, id=chatcmpl-BadnH1LyTJNzfCcuNPDQLW8aKqHem}]]}
