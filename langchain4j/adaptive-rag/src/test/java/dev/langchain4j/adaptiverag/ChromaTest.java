@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.logging.LogManager;
 
+import static dev.langchain4j.store.embedding.chroma.ChromaApiVersion.V1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ChromaTest {
@@ -32,23 +33,31 @@ public class ChromaTest {
         String openApiKey = DotEnvConfig.valueOf("OPENAI_API_KEY")
                 .orElseThrow( () -> new IllegalArgumentException("no APIKEY provided!"));
 
-        ChromaEmbeddingStore chroma = new ChromaEmbeddingStore(
-                "http://localhost:8000",
-                "rag-chroma",
-                Duration.ofMinutes(2),
-                true,
-                true);
+        // Chroma的嵌入存储
+        ChromaEmbeddingStore chroma = ChromaEmbeddingStore.builder()
+//                .apiVersion(V1)
+                .baseUrl("http://localhost:8000")
+                .collectionName("rag-chroma")
+                .logRequests(true)
+                .logResponses(true)
+                .timeout(Duration.ofMinutes(2))
+                .build();
 
+        // OpenAI的嵌入模型
         OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder()
                 .apiKey(openApiKey)
                 .build();
+        // 嵌入
+        // 代理记忆的类型有哪些？
         Embedding queryEmbedding = embeddingModel.embed( "What are the types of agent memory?" ).content();
 
+        // 嵌入搜索
         EmbeddingSearchRequest query = EmbeddingSearchRequest.builder()
                 .queryEmbedding( queryEmbedding )
                 .maxResults( 3 )
                 .minScore( 0.0 )
                 .build();
+        // 相似性搜索
         EmbeddingSearchResult<TextSegment> relevant = chroma.search( query );
 
         List<EmbeddingMatch<TextSegment>> matches = relevant.matches();
