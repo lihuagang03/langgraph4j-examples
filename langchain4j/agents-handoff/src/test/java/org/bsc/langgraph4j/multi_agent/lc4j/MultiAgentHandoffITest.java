@@ -10,8 +10,14 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 多个智能体交接测试
+ */
 public class MultiAgentHandoffITest {
 
+    /**
+     * AI模型
+     */
     enum AiModel {
 
         OPENAI_GPT_4O_MINI( OpenAiChatModel.builder()
@@ -42,6 +48,9 @@ public class MultiAgentHandoffITest {
                 .build() )
         ;
 
+        /**
+         * 聊天模型
+         */
         public final ChatModel model;
 
         AiModel(  ChatModel model ) {
@@ -53,14 +62,17 @@ public class MultiAgentHandoffITest {
     @Test
     public void testHandoff() throws Exception {
 
+        // 代理市场
         var agentMarketplace = AgentMarketplace.builder()
                 .chatModel( AiModel.OLLAMA_QWEN2_5_7B.model )
                 .build();
 
+        // 代理付款
         var agentPayment = AgentPayment.builder()
                 .chatModel( AiModel.OLLAMA_QWEN3_14B.model )
                 .build();
 
+        // 代理转接
         var handoffExecutor = AgentHandoff.builder()
                 .chatModel(AiModel.OLLAMA_QWEN3_14B.model)
                 .agent( agentMarketplace )
@@ -71,6 +83,7 @@ public class MultiAgentHandoffITest {
 
         var input = "search for product 'X' and purchase it";
 
+        // 调用
         var result = handoffExecutor.invoke( Map.of( "messages", UserMessage.from(input)));
 
         System.out.println( result );
