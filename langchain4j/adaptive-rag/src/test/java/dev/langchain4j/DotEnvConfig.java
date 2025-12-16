@@ -9,9 +9,12 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 
+/**
+ * 环境配置
+ */
 public interface DotEnvConfig {
 
-    static void load()  {
+    static void load() {
 
         // Search for .env file
         Path path = Paths.get(".").toAbsolutePath();
@@ -49,6 +52,5 @@ public interface DotEnvConfig {
         }
         return ofNullable(value);
     }
-
 
 }
