@@ -17,8 +17,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
+/**
+ * MCP客户端代理
+ */
 public class MCPClientAgent {
 
+    /**
+     * AI模型
+     */
     enum AiModel {
 
         OPENAI_GPT_4O_MINI( () -> OpenAiChatModel.builder()
@@ -49,8 +55,14 @@ public class MCPClientAgent {
                 .build() )
         ;
 
+        /**
+         * 聊天模型提供商
+         */
         private final Supplier<ChatModel> modelSupplier;
 
+        /**
+         * 聊天模型
+         */
         public ChatModel model() {
             return modelSupplier.get();
         }
@@ -62,6 +74,9 @@ public class MCPClientAgent {
 
     static class MCPPostgres implements AutoCloseable {
 
+        /**
+         * MCP客户端
+         */
         final McpClient mcpClient;
 
         McpClient client() {
@@ -69,6 +84,7 @@ public class MCPClientAgent {
         }
 
         MCPPostgres() {
+            // MCP传输
             var transport = new StdioMcpTransport.Builder()
                     .command(List.of(
                             "docker",
@@ -80,17 +96,21 @@ public class MCPClientAgent {
                     .logEvents(true) // only if you want to see the traffic in the log
                     .environment(Map.of())
                     .build();
+
+            // MCP客户端
             this.mcpClient = new DefaultMcpClient.Builder()
                     .transport(transport)
                     .build();
         }
 
         String readDBSchemaAsString() {
+            // MCP 资源列表（例如，数据表格）
             // List of MCP resources ( ie. tables )
             var dbTableRes = mcpClient.listResources()
                     .stream()
                     .toList();
 
+            // 针对每个资源提取内容（即，数据列）
             // For each resource extract contents ( ie. columns )
             var dbColumnsRes = dbTableRes.stream()
                     .map( res -> mcpClient.readResource( res.uri()) )
@@ -126,13 +146,17 @@ public class MCPClientAgent {
 
         try( var mcpClient = new MCPPostgres() ) {
 
+            // 代理执行器
             var agent = AgentExecutor.builder()
                     .chatModel( AiModel.OLLAMA_QWEN2_5_7B.model() )
-                    .tool( mcpClient.client() ) // add tools directly from MCP client
+                    // 直接从MCP客户端添加工具
+                    // add tools directly from MCP client
+                    .tool( mcpClient.client() )
                     .build()
                     .compile();
 
 
+            // 提示模版
             var prompt = PromptTemplate.from(
                     """
                             You have access to the following tables:
@@ -145,11 +169,13 @@ public class MCPClientAgent {
                             """
             );
 
+            // 用户消息
             var message = prompt.apply( Map.of(
                             "schema", mcpClient.readDBSchemaAsString(),
                             "input", "get all issues names and project" ) )
                     .toUserMessage();
 
+            // 调用-最终回应
             var result = agent.invoke( Map.of( "messages", message) )
                     .flatMap(AgentExecutor.State::finalResponse)
                     .orElse("no response");
